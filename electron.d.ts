@@ -1,4 +1,4 @@
-// Type definitions for Electron 43.0.0-alpha.1+wvcus
+// Type definitions for Electron 43.0.0-beta.1+wvcus
 // Project: http://electronjs.org/
 // Definitions by: The Electron Team <https://github.com/electron/electron>
 // Definitions: https://github.com/electron/typescript-definitions
@@ -2229,6 +2229,10 @@ declare namespace Electron {
     removeListener(event: 'maximize', listener: () => void): this;
     /**
      * Emitted when the window is minimized.
+     *
+     * > [!NOTE] On Wayland, “minimized” is not currently a supported state. The
+     * minimize event will only fire when triggered by client-side decoration (e.g.
+     * clicking the minimize button on a frameless window’s Window Control Overlay)
      */
     on(event: 'minimize', listener: () => void): this;
     off(event: 'minimize', listener: () => void): this;
@@ -4398,6 +4402,10 @@ declare namespace Electron {
     removeListener(event: 'maximize', listener: () => void): this;
     /**
      * Emitted when the window is minimized.
+     *
+     * > [!NOTE] On Wayland, “minimized” is not currently a supported state. The
+     * minimize event will only fire when triggered by client-side decoration (e.g.
+     * clicking the minimize button on a frameless window’s Window Control Overlay)
      */
     on(event: 'minimize', listener: () => void): this;
     off(event: 'minimize', listener: () => void): this;
@@ -4406,6 +4414,10 @@ declare namespace Electron {
     removeListener(event: 'minimize', listener: () => void): this;
     /**
      * Emitted when the window is minimized.
+     *
+     * > [!NOTE] On Wayland, “minimized” is not currently a supported state. The
+     * minimize event will only fire when triggered by client-side decoration (e.g.
+     * clicking the minimize button on a frameless window’s Window Control Overlay)
      */
     on(event: 'minimize', listener: () => void): this;
     off(event: 'minimize', listener: () => void): this;
@@ -10450,7 +10462,7 @@ declare namespace Electron {
      * Emitted when an error is encountered while creating and showing the native
      * notification.
      *
-     * @platform win32
+     * @platform darwin,win32
      */
     on(event: 'failed', listener: (event: Event,
                                    /**
@@ -10458,7 +10470,7 @@ declare namespace Electron {
                                     */
                                    error: string) => void): this;
     /**
-     * @platform win32
+     * @platform darwin,win32
      */
     off(event: 'failed', listener: (event: Event,
                                    /**
@@ -10466,7 +10478,7 @@ declare namespace Electron {
                                     */
                                    error: string) => void): this;
     /**
-     * @platform win32
+     * @platform darwin,win32
      */
     once(event: 'failed', listener: (event: Event,
                                    /**
@@ -10474,7 +10486,7 @@ declare namespace Electron {
                                     */
                                    error: string) => void): this;
     /**
-     * @platform win32
+     * @platform darwin,win32
      */
     addListener(event: 'failed', listener: (event: Event,
                                    /**
@@ -10482,7 +10494,7 @@ declare namespace Electron {
                                     */
                                    error: string) => void): this;
     /**
-     * @platform win32
+     * @platform darwin,win32
      */
     removeListener(event: 'failed', listener: (event: Event,
                                    /**
@@ -10607,6 +10619,26 @@ declare namespace Electron {
      * Whether or not desktop notifications are supported on the current system
      */
     static isSupported(): boolean;
+    /**
+     * Removes one or more delivered notifications from Notification Center by their
+     * identifier(s).
+     *
+     * @platform darwin
+     */
+    static remove(id: (string) | (string[])): void;
+    /**
+     * Removes all of the app's delivered notifications from Notification Center.
+     *
+     * @platform darwin
+     */
+    static removeAll(): void;
+    /**
+     * Removes all delivered notifications with the given `groupId` from Notification
+     * Center.
+     *
+     * @platform darwin
+     */
+    static removeGroup(groupId: string): void;
     /**
      * Dismisses the notification.
      *
@@ -18263,7 +18295,7 @@ declare namespace Electron {
      * When `contents` is a `<webview>` tag, the `mode` would be `detach` by default,
      * explicitly passing an empty `mode` can force using last used dock state.
      *
-     * On Windows, if Windows Control Overlay is enabled, DevTools will be opened with
+     * On Windows, if Window Control Overlay is enabled, DevTools will be opened with
      * `mode: 'detach'`.
      */
     openDevTools(options?: OpenDevToolsOptions): void;
@@ -20407,6 +20439,12 @@ declare namespace Electron {
      * Defaults to 1.0.
      */
     scaleFactor?: number;
+    /**
+     * The target color space for the output pixel data. Defaults to sRGB. Pass the
+     * image's original color space to preserve the previous behavior, or another color
+     * space to get pixel values in that space.
+     */
+    colorSpace?: ColorSpace;
   }
 
   interface BlinkMemoryInfo {
@@ -22348,8 +22386,9 @@ declare namespace Electron {
      * A unique identifier for the notification. On macOS, maps to
      * `UNNotificationRequest`'s `identifier` property. On Windows, maps to the toast
      * notification's `Tag` property. Defaults to a random UUID if not provided or if
-     * an empty string is passed. This can be used to remove or update previously
-     * delivered notifications.
+     * an empty string is passed. Use this identifier with `Notification.remove()` to
+     * remove specific delivered notifications, or with `Notification.getHistory()` to
+     * identify them.
      *
      * @platform darwin,win32
      */
@@ -22358,7 +22397,8 @@ declare namespace Electron {
      * A string identifier used to visually group notifications together in
      * Notification Center / Action Center. On macOS, maps to `UNNotificationContent`'s
      * `threadIdentifier` property. On Windows, maps to the toast notification's
-     * `Group` property.
+     * `Group` property. Use this identifier with `Notification.removeGroup()` to
+     * remove all notifications in a group.
      *
      * @platform darwin,win32
      */
@@ -23713,6 +23753,12 @@ declare namespace Electron {
      * Defaults to 1.0.
      */
     scaleFactor?: number;
+    /**
+     * The target color space for the output pixel data. Defaults to sRGB. Pass the
+     * image's original color space to preserve the previous behavior, or another color
+     * space to get pixel values in that space.
+     */
+    colorSpace?: ColorSpace;
   }
 
   interface ToDataURLOptions {
@@ -24758,6 +24804,14 @@ declare namespace Electron {
      * `<TEAM_ID>.<BUNDLE_ID>.webauthn`.
      */
     keychainAccessGroup: string;
+    /**
+     * Customizes the reason text shown in the macOS Touch ID prompt. macOS renders the
+     * prompt as `"<App Name>" is trying to <promptReason>`, so the value should be a
+     * lowercase sentence fragment. An optional `$1` placeholder is replaced with the
+     * relying party ID (e.g. `example.com`) of the request being authenticated.
+     * Defaults to `verify your identity on $1`.
+     */
+    promptReason?: string;
   }
 
   interface Video {
